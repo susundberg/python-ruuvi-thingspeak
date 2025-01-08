@@ -11,14 +11,15 @@ LOG = logging.getLogger("main")
 
 class Ruuvi:
     def __init__(self, config):
-        self.sensors = config["sensors"]
+        self.sensors = {x[0]: x[1] for x in config["sensors"]}
         self.queue = queue.Queue()
         self.exit_event = asyncio.Event()
 
     @staticmethod
     def _ruuvi_df5_decode_data(data: str):
         """
-        Decode sensor data.
+        Decode sensor data. Copy pasted from official ruuvi tag
+        https://github.com/ttu/ruuvitag-sensor
         """
 
         def _get_temperature(data: bytes) -> float | None:

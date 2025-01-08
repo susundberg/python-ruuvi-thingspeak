@@ -5,6 +5,7 @@ indent-width = 4
 
 [tool.ruff.lint]
 fixable = ["ALL"]
+extend-ignore = ["E402"]
 
 [tool.ruff.format]
 # Like Black, use double quotes for strings.

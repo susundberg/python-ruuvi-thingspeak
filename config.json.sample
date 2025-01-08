@@ -1,12 +1,13 @@
 {
-    "sensors": {
-        "DE:8E:63:B5:18:78": "BLACK",
-        "DF:AE:0F:AF:E3:76": "RED"
-    },
+    "sensors": [
+        ["DE:8E:63:B5:18:78","BLACK"],
+        ["DF:AE:0F:AF:E3:76","RED"]
+    ],
     "ble_disapear_s": 240,
     "thingspeak_interval_s": 20,
     "thingspeak_api_key":"MY API KEY",
     "thingspeak_url": "https://api.thingspeak.com/update"
-
+    "verbose":false,
+    "logfile":"python-ruuvi.log"
 
 }

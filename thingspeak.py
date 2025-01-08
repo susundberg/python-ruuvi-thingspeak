@@ -13,21 +13,19 @@ class ThingSpeak:
 
     def __init__(self, config):
         self.url = config["thingspeak_url"]
-        self.devices = {
-            key: loop for (loop, key) in enumerate(config["sensors"].values())
-        }
+        self.devices = {x[1]: loop for (loop, x) in enumerate(config["sensors"])}
         self.api_key = config["thingspeak_api_key"]
         self.config_upload_interval = config["thingspeak_interval_s"]
         self.last_update = time.time()
 
         self.data = {
-            x: [
+            x[1]: [
                 0.0,
             ]
             * (1 + len(self.TO_LOG))
-            for x in config["sensors"].values()
+            for x in config["sensors"]
         }
-        self.last = {x: 0 for x in config["sensors"].values()}
+        self.last = {x[1]: 0 for x in config["sensors"]}
 
     def _upload(self, payload):
         encoded_data = urllib.parse.urlencode(payload).encode("utf-8")
@@ -80,6 +78,3 @@ class ThingSpeak:
         for loop, key in enumerate(self.TO_LOG):
             self.data[name][1 + loop] += payload[key]
         self._check_upload()
-
-
-

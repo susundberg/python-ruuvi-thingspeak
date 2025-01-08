@@ -1,8 +1,23 @@
+#!/usr/bin/env python3
+
 import argparse
 import logging
 import sys
 import json
 import signal
+import os
+
+from logging.handlers import RotatingFileHandler
+
+
+def add_import():
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    if current_dir not in sys.path:
+        sys.path.append(current_dir)
+
+
+if __name__ == "__main__":
+    add_import()
 
 from ruuvi import Ruuvi
 from thingspeak import ThingSpeak
@@ -40,16 +55,14 @@ def config_get_file(config: dict):
         del config["_cmdline"]
 
 
-def main():
-    logging.basicConfig(
-        level=logging.INFO,
-        stream=sys.stdout,
-        format="%(asctime)s [%(levelname)s] > %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+def get_config():
     config = {}
     config_get_commandline(config)
     config_get_file(config)
+    return config
+
+
+def main(config):
     LOG.info("Using config: %s", config)
 
     source = Ruuvi(config)
@@ -67,4 +80,29 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    config = get_config()
+
+    logging.getLogger().setLevel(logging.INFO)
+
+    formatter = logging.Formatter(
+        "%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+    )
+
+    rot_handler = RotatingFileHandler(
+        config["logfile"],
+        maxBytes=2**12,
+        backupCount=1,
+    )
+
+    def add_logging_handler(handler):
+        handler.setFormatter(formatter)
+        handler.setLevel(logging.INFO)
+        logging.getLogger().addHandler(handler)
+
+    add_logging_handler(rot_handler)
+
+    if config["verbose"]:
+        stdout_handler = logging.StreamHandler(sys.stdout)
+        stdout_handler.setLevel(logging.DEBUG)
+        add_logging_handler(stdout_handler)
+    main(config)
