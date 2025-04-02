@@ -18,8 +18,7 @@ class Ruuvi:
     @staticmethod
     def _ruuvi_df5_decode_data(data: str):
         """
-        Decode sensor data. Copy pasted from official ruuvi tag
-        https://github.com/ttu/ruuvitag-sensor
+        Decode sensor data.
         """
 
         def _get_temperature(data: bytes) -> float | None:

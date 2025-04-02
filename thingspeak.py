@@ -37,12 +37,13 @@ class ThingSpeak:
                     LOG.error("Failed to upload data. Check your API key and fields.")
                 else:
                     LOG.info(f"Data uploaded successfully. Entry ID: {result}")
+                    self.last_update = time.time()
         except urllib.error.URLError as e:
             LOG.error(f"Failed to connect: {e.reason}")
         except Exception as e:
             LOG.error(f"An unexpected error occurred: {e}")
 
-    def _check_upload(self):
+    def check_upload(self):
         if self.last_update + self.config_upload_interval > time.time():
             return
 
@@ -77,4 +78,4 @@ class ThingSpeak:
         self.data[name][0] += 1
         for loop, key in enumerate(self.TO_LOG):
             self.data[name][1 + loop] += payload[key]
-        self._check_upload()
+        self.check_upload()

@@ -6,7 +6,7 @@ import sys
 import json
 import signal
 import os
-
+import queue
 from logging.handlers import RotatingFileHandler
 
 
@@ -38,6 +38,7 @@ def config_get_commandline(config):
         description="RuuviTag listener and upload to thingspeak"
     )
     parser.add_argument("--config-file", default="config.json")
+    parser.add_argument("--verbose", action="store_true")
     cmd_args = vars(parser.parse_args())
     config.update(cmd_args)
     config["_cmdline"] = cmd_args
@@ -70,7 +71,11 @@ def main(config):
     source.start()
 
     while True:
-        data = source.queue.get()
+        try:
+            data = source.queue.get(timeout=60.0)
+        except queue.Empty:
+            uploader.check_upload()
+            continue
 
         if data is None:
             LOG.info("EOF from source.")
@@ -90,7 +95,7 @@ if __name__ == "__main__":
 
     rot_handler = RotatingFileHandler(
         config["logfile"],
-        maxBytes=2**12,
+        maxBytes=2**18,
         backupCount=1,
     )
 
@@ -103,6 +108,5 @@ if __name__ == "__main__":
 
     if config["verbose"]:
         stdout_handler = logging.StreamHandler(sys.stdout)
-        stdout_handler.setLevel(logging.DEBUG)
         add_logging_handler(stdout_handler)
     main(config)
